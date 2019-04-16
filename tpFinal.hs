@@ -1,7 +1,8 @@
 import Text.Show.Functions
 
+--DEFINICIONES
 type Tesoro = (String,Int)
-type FormaDeSaqueo = Pirata->Tesoro->Pirata
+type FormaDeSaqueo = Tesoro->Bool
 
 data Pirata = Pirata {
 nombre::String,
@@ -21,10 +22,6 @@ nombreIs::String
 data Ciudad = Ciudad {
 tesorosCiudad::[Tesoro]
 } deriving (Show)
-
-erevan = Ciudad {
-tesorosCiudad = [("arco encantado",120),("espejo",25)]
-}
 
 jackSparrow = Pirata {
 nombre = "JackSparrow",
@@ -51,6 +48,16 @@ nombre = "Will Turner",
 botin =[("cuchillo",5)]
 }
 
+perlaNegra = Barco {
+piratas = [jackSparrow,anneBonny,elizabethSwann],
+saqueoPor = soloValiosos
+}
+
+holandesErrante = Barco {
+piratas = [davidJones],
+saqueoPor = (soloObjetosEspecificos "caja")
+}
+
 islaTortuga = Isla {
 objetoEspecifico = ("frasco de arena",1),
 nombreIs = "Isla Tortuga"
@@ -61,27 +68,25 @@ objetoEspecifico = ("botella de ron",25),
 nombreIs = "Isla del Ron"
 }
 
-perlaNegra = Barco {
-piratas = [jackSparrow,anneBonny,elizabethSwann],
-saqueoPor = soloValiosos
+lima = Ciudad {
+tesorosCiudad = [("arco encantado",120),("espejo",25)]
 }
 
-holandesErrante = Barco {
-piratas = [davidJones],
-saqueoPor= nada
-}
-
+--TESOROS PIRATAS
 segundosElementos::[Tesoro]->[Int]
 segundosElementos tesoros = map (snd) tesoros  
 
 primerosElementos::[Tesoro]->[String]
-primerosElementos tesoros = map (fst) tesoros 
+primerosElementos tesoros = map (fst) tesoros  
+
+name::Pirata->String
+name (Pirata nom _) = nom
 
 tesoros::Pirata->[Tesoro]
 tesoros (Pirata _ tes) = tes
 
-name::Pirata->String
-name (Pirata nom _) = nom
+listaTesoros::[Pirata]->[Tesoro]
+listaTesoros pir = concat (map (tesoros) pir)
 
 cantTesoros::Pirata->Int
 cantTesoros pir = (length.segundosElementos.tesoros) pir
@@ -90,16 +95,13 @@ esAfortunado::Pirata->Bool
 esAfortunado pir = (sum.segundosElementos.tesoros) pir >= 10000
 
 mismoTesoroValorDistinto::Pirata->Pirata->Bool
-mismoTesoroValorDistinto (Pirata nom1 tes1) (Pirata nom2 tes2) = any (==True) (listaNombresIgualesyValoresDistintos tes1 tes2)
+mismoTesoroValorDistinto pirata1 pirata2 = any (pirataTieneMismoTesoroConValorDistinto pirata2) (tesoros pirata1)
 
-listaNombresIgualesyValoresDistintos::[Tesoro]->[Tesoro]->[Bool]
-listaNombresIgualesyValoresDistintos tesoro1 tesoro2 = zipWith (&&) (listaNombresIguales tesoro1 tesoro2) (listaValoresDistintos tesoro1 tesoro2)
+pirataTieneMismoTesoroConValorDistinto::Pirata->Tesoro->Bool
+pirataTieneMismoTesoroConValorDistinto (Pirata nombre tesoros) tesoro = any (tieneMismoNombreYDistintoValor tesoro) tesoros
 
-listaNombresIguales::[Tesoro]->[Tesoro]->[Bool]
-listaNombresIguales tesoro1 tesoro2 = zipWith (==) (primerosElementos tesoro1) (primerosElementos tesoro2)
-
-listaValoresDistintos::[Tesoro]->[Tesoro]->[Bool]
-listaValoresDistintos tesoro1 tesoro2 = zipWith (/=) (segundosElementos tesoro1) (segundosElementos tesoro2)
+tieneMismoNombreYDistintoValor::Tesoro->Tesoro->Bool
+tieneMismoNombreYDistintoValor t1 t2 = (fst t1 == fst t2) && (snd t1 /= snd t2)
 
 tesoroMasValioso::Pirata->Int
 tesoroMasValioso pir = (maximum.segundosElementos.tesoros) pir
@@ -113,24 +115,23 @@ perderTesorosValiosos (Pirata nom tes) = Pirata nom (filter ((<=100).snd) tes)
 perderTesorosNombres::Pirata->String->Pirata
 perderTesorosNombres (Pirata nom tes) nomtes = Pirata nom (filter ((/=nomtes).fst) tes)
 
-soloValiosos::Pirata->Tesoro->Pirata
-soloValiosos (Pirata nom tes) tesoro = Pirata nom (tes ++ filter ((>=100).snd) [tesoro])
+--TEMPORADA DE SAQUEOS
+soloValiosos::Tesoro->Bool
+soloValiosos = ((>=100).snd)
 
-verificarPalabra::Tesoro->String->[Tesoro]
-verificarPalabra tesoro palabra = filter ((==palabra).fst) [tesoro]
+soloObjetosEspecificos::String->Tesoro->Bool
+soloObjetosEspecificos clave tesoro = ((==clave).fst) tesoro
 
-soloObjetosEspecificos::Pirata->Tesoro->String->Pirata
-soloObjetosEspecificos (Pirata nom tes) tesoro clave = Pirata nom (tes ++ (verificarPalabra tesoro clave))
+soloNada::Tesoro->Bool
+soloNada tesoro = False
 
-nada::Pirata->Tesoro->Pirata
-nada pirata tesoro = pirata
+cualquierTesoro::
+cualquierTesoro
 
-saquear::Pirata->FormaDeSaqueo->Tesoro->Pirata
-saquear pirata metodo tesoro = metodo pirata tesoro
+saquear::(Tesoro->Bool)->Pirata->Tesoro->Pirata
+saquear metodo (Pirata nom tes) tesoro = Pirata nom (tes ++ (filter (metodo) [tesoro]))
 
-saquear2::String->Pirata->(Pirata->Tesoro->String->Pirata)->Tesoro->Pirata
-saquear2 clave pirata metodo tesoro = metodo pirata tesoro clave
-
+--NAVEGANDO LOS SIETE MARES
 incorporaTripulacion::Pirata->Barco->Barco
 incorporaTripulacion pirata (Barco pir fma) = Barco (pir ++ [pirata]) fma
 
@@ -143,15 +144,19 @@ anclarIslaDeshabitada (Barco pir fma) (Isla obj nom) = Barco (agregarVariosTesor
 agregarVariosTesoros::[Pirata]->Tesoro->[Pirata]
 agregarVariosTesoros pir tes = map (agregarTesoro tes) pir
 
+cantTesorosCiudad::Ciudad->Int
+cantTesorosCiudad (Ciudad tes) = length tes
+
 atacarCiudad::Ciudad->Barco->Barco
-atacarCiudad (Ciudad tes) (Barco piratas fma) | length piratas > length tes = Barco (( zipWith (fma) (take (length tes) piratas) tes)) fma
-                                              | otherwise = Barco ((zipWith (fma) piratas (take (length piratas) tes)) ++ (drop (length piratas) piratas)) fma
+atacarCiudad (Ciudad tes) (Barco piratas fma)
+| length piratas > length tes = Barco (zipWith (saquear fma) (take (length tes) piratas) tes) fma
+| otherwise = Barco (zipWith (saquear fma) piratas (take (length piratas) tes)) fma
 
-
+{-Los piratas del barco con mayor cantidad de tripulantes mata a los piratas del otro barco y a cada pirata del barco de mayor tripulacion se le asignan los tesoros de un pirata asesinado del otro barco. En el caso de que las tripulaciones sean iguales, todos los piratas se suben al primer barco y el segundo queda abandonado.-}
 abordarOtroBarco::Barco->Barco->Barco
-abordarOtroBarco (Barco pir1 fma1) (Barco pir2 fma2) | length pir1 > length pir2 = Barco ((zipWith (fma1) (take (length pir2) pir1) (listaTesoros pir2))++(drop (length pir2) pir1)) fma1
-                                                     | length pir1 < length pir2 = Barco ((zipWith (fma2) (take (length pir1) pir2) (listaTesoros pir1))++(drop (length pir1) pir2)) fma2
-													 | otherwise = Barco (pir1++pir2) fma1
+abordarOtroBarco (Barco pir1 fma1) (Barco pir2 fma2) 
+| length pir1 > length pir2 = Barco ((zipWith (saquear fma1) (take (length pir2) pir1) (listaTesoros pir2)) ++ (drop (length pir2) pir1)) fma1
+| length pir1 < length pir2 = Barco ((zipWith (saquear fma2) (take (length pir1) pir2) (listaTesoros pir1)) ++ (drop (length pir1) pir2)) fma2
+| otherwise = Barco (pir1 ++ pir2) fma1
 
-listaTesoros::[Pirata]->[Tesoro]
-listaTesoros pir = (concat.map (tesoros)) pir
+--FIN TP
