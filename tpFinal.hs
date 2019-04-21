@@ -1,5 +1,5 @@
 import Text.Show.Functions
-
+--Comienzo TP
 --DEFINICIONES
 type Tesoro = (String,Int)
 type FormaDeSaqueo = Tesoro->Bool
