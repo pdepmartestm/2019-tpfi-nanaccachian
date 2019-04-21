@@ -98,7 +98,7 @@ mismoTesoroValorDistinto::Pirata->Pirata->Bool
 mismoTesoroValorDistinto pirata1 pirata2 = any (pirataTieneMismoTesoroConValorDistinto pirata2) (tesoros pirata1)
 
 pirataTieneMismoTesoroConValorDistinto::Pirata->Tesoro->Bool
-pirataTieneMismoTesoroConValorDistinto (Pirata nombre tesoros) tesoro = any (tieneMismoNombreYDistintoValor tesoro) tesoros
+pirataTieneMismoTesoroConValorDistinto (Pirata _ tesoros) tesoro = any (tieneMismoNombreYDistintoValor tesoro) tesoros
 
 tieneMismoNombreYDistintoValor::Tesoro->Tesoro->Bool
 tieneMismoNombreYDistintoValor t1 t2 = (fst t1 == fst t2) && (snd t1 /= snd t2)
@@ -125,8 +125,6 @@ soloObjetosEspecificos clave tesoro = ((==clave).fst) tesoro
 soloNada::Tesoro->Bool
 soloNada tesoro = False
 
-cualquierTesoro::
-cualquierTesoro
 
 saquear::(Tesoro->Bool)->Pirata->Tesoro->Pirata
 saquear metodo (Pirata nom tes) tesoro = Pirata nom (tes ++ (filter (metodo) [tesoro]))
@@ -139,7 +137,7 @@ abandonaTripulacion::Pirata->Barco->Barco
 abandonaTripulacion (Pirata nom _) (Barco pir fma) = Barco (filter ((/=nom).name) pir) fma
 
 anclarIslaDeshabitada::Barco->Isla->Barco
-anclarIslaDeshabitada (Barco pir fma) (Isla obj nom) = Barco (agregarVariosTesoros pir obj) fma
+anclarIslaDeshabitada (Barco pir fma) (Isla obj _) = Barco (agregarVariosTesoros pir obj) fma
 
 agregarVariosTesoros::[Pirata]->Tesoro->[Pirata]
 agregarVariosTesoros pir tes = map (agregarTesoro tes) pir
@@ -148,15 +146,13 @@ cantTesorosCiudad::Ciudad->Int
 cantTesorosCiudad (Ciudad tes) = length tes
 
 atacarCiudad::Ciudad->Barco->Barco
-atacarCiudad (Ciudad tes) (Barco piratas fma)
-| length piratas > length tes = Barco (zipWith (saquear fma) (take (length tes) piratas) tes) fma
-| otherwise = Barco (zipWith (saquear fma) piratas (take (length piratas) tes)) fma
+atacarCiudad (Ciudad tes) (Barco piratas fma) | length piratas > length tes = Barco (zipWith (saquear fma) (take (length tes) piratas) tes) fma
+                                              | otherwise = Barco (zipWith (saquear fma) piratas (take (length piratas) tes)) fma
 
 {-Los piratas del barco con mayor cantidad de tripulantes mata a los piratas del otro barco y a cada pirata del barco de mayor tripulacion se le asignan los tesoros de un pirata asesinado del otro barco. En el caso de que las tripulaciones sean iguales, todos los piratas se suben al primer barco y el segundo queda abandonado.-}
 abordarOtroBarco::Barco->Barco->Barco
-abordarOtroBarco (Barco pir1 fma1) (Barco pir2 fma2) 
-| length pir1 > length pir2 = Barco ((zipWith (saquear fma1) (take (length pir2) pir1) (listaTesoros pir2)) ++ (drop (length pir2) pir1)) fma1
-| length pir1 < length pir2 = Barco ((zipWith (saquear fma2) (take (length pir1) pir2) (listaTesoros pir1)) ++ (drop (length pir1) pir2)) fma2
-| otherwise = Barco (pir1 ++ pir2) fma1
+abordarOtroBarco (Barco pir1 fma1) (Barco pir2 fma2) | length pir1 > length pir2 = Barco ((zipWith (saquear fma1) (take (length pir2) pir1) (listaTesoros pir2)) ++ (drop (length pir2) pir1)) fma1
+                                                     | length pir1 < length pir2 = Barco ((zipWith (saquear fma2) (take (length pir1) pir2) (listaTesoros pir1)) ++ (drop (length pir1) pir2)) fma2
+                                                     | otherwise = Barco (pir1 ++ pir2) fma1
 
 --FIN TP
