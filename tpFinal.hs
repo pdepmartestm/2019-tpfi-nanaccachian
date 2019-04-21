@@ -99,7 +99,7 @@ mismoTesoroValorDistinto pirata1 pirata2 = any (pirataTieneMismoTesoroConValorDi
 
 pirataTieneMismoTesoroConValorDistinto::Pirata->Tesoro->Bool
 pirataTieneMismoTesoroConValorDistinto (Pirata _ tesoros) tesoro = any (tieneMismoNombreYDistintoValor tesoro) tesoros
-
+ 
 tieneMismoNombreYDistintoValor::Tesoro->Tesoro->Bool
 tieneMismoNombreYDistintoValor t1 t2 = (fst t1 == fst t2) && (snd t1 /= snd t2)
 
