@@ -125,8 +125,11 @@ soloObjetosEspecificos clave tesoro = ((==clave).fst) tesoro
 soloNada::Tesoro->Bool
 soloNada tesoro = False
 
-cualquierTesoro::(Tesoro->Bool)->(Tesoro->Bool)->Tesoro->Bool
-cualquierTesoro fma1 fma2 tesoro = fma1 tesoro || fma2 tesoro
+cualquierTesoro::[FormaDeSaqueo]->Tesoro->Bool
+cualquierTesoro saqueos tesoro = any (queLoCumpla tesoro) saqueos
+
+queLoCumpla::Tesoro->FormaDeSaqueo->Bool
+queLoCumpla tesoro saqueo = saqueo tesoro
 
 saquear::(Tesoro->Bool)->Pirata->Tesoro->Pirata
 saquear metodo (Pirata nom tes) tesoro = Pirata nom (tes ++ (filter (metodo) [tesoro]))
