@@ -5,11 +5,13 @@ type FormaDeSaqueo = Tesoro->Bool
 
 data Tesoro = Tesoro {
     nombreT::String,
-    valorT::Int
+    valorT::Float
 } | Bono {
-    cotizaciones::[Int]
+    nombreB::String,
+    cotizaciones::[Float]
 } | Letra {
     nombreL::String,
+    importeNom::Float,
     tasa::Float
 } deriving (Show)
 
@@ -135,7 +137,7 @@ espejo = Tesoro {
 primerosElementos::[Tesoro]->[String]
 primerosElementos tesoros = map (nombreT) tesoros
 
-segundosElementos::[Tesoro]->[Int]
+segundosElementos::[Tesoro]->[Float]
 segundosElementos tesoros = map (valorT) tesoros  
 
 name::Pirata->String
@@ -162,7 +164,7 @@ pirataTieneMismoTesoroConValorDistinto (Pirata _ tesoros) tesoro = any (tieneMis
 tieneMismoNombreYDistintoValor::Tesoro->Tesoro->Bool
 tieneMismoNombreYDistintoValor t1 t2 = (nombreT t1 == (nombreT t2)) && (valorT t1 /= (valorT t2))
 
-tesoroMasValioso::Pirata->Int
+tesoroMasValioso::Pirata->Float
 tesoroMasValioso pir = (maximum.segundosElementos.tesoros) pir
 
 agregarTesoro::Tesoro->Pirata->Pirata
@@ -223,8 +225,26 @@ abordarOtroBarco (Barco pir1 fma1) (Barco pir2 fma2) | length pir1 > length pir2
 
 --COMIENZO TP PARTE II
 
-valor::Tesoro->Int
-valor (Bono cot) = mayorMenorCot + div mayorMenorCot cor 
+--TESOROS PARA TODOS
 
-mayorMenorCot::[Int]->Int
+mayorMenorCot::[Float]->Float
 mayorMenorCot cot = maximum cot - (minimum cot)
+
+--SAQUEOS SOFISTICADOS
+
+nombreTesoros::Tesoro->String
+nombreTesoros (Tesoro nT _) = nT
+nombreTesoros (Bono nB _) = nB
+nombreTesoros (Letra nL _ _) = nL
+
+valoresTesoros::Tesoro->Float
+valoresTesoros (Tesoro _ v) = v
+valoresTesoros (Bono _ cot) = mayorMenorCot cot + ((/2).mayorMenorCot) cot
+valoresTesoros (Letra _ imp tasa) = imp + imp / tasa
+
+--SAQUEOS SOFISTICADOS
+buitre::Tesoro->Bool
+buitre tesoros = ((=="Bono").nombreTesoros) tesoros
+
+fobicos::String->Tesoro->Bool
+fobicos fobia = not.(soloObjetosEspecificos fobia)
