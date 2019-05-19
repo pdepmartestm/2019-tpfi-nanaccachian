@@ -202,8 +202,8 @@ incorporaTripulacion pirata (Barco pir fma) = Barco (pir ++ [pirata]) fma
 abandonaTripulacion::Pirata->Barco->Barco
 abandonaTripulacion (Pirata nom _) (Barco pir fma) = Barco (filter ((/=nom).name) pir) fma
 
-anclarIslaDeshabitada::Barco->Isla->Barco
-anclarIslaDeshabitada (Barco pir fma) (Isla obj _) = Barco (agregarVariosTesoros pir obj) fma
+anclarIslaDeshabitada::Isla->Barco->Barco
+anclarIslaDeshabitada (Isla obj _) (Barco pir fma)  = Barco (agregarVariosTesoros pir obj) fma
 
 agregarVariosTesoros::[Pirata]->Tesoro->[Pirata]
 agregarVariosTesoros pir tes = map (agregarTesoro tes) pir
@@ -248,3 +248,65 @@ buitre tesoros = ((=="Bono").nombreTesoros) tesoros
 
 fobicos::String->Tesoro->Bool
 fobicos fobia = not.(soloObjetosEspecificos fobia)
+
+--UNIVERSIDAD PIRATA
+universidadPirata::Barco->(FormaDeSaqueo->FormaDeSaqueo)->Barco
+universidadPirata (Barco pir saqueo) criterioSaqueoNuevo  = Barco pir (criterioSaqueoNuevo saqueo)
+
+--cambiarSaqueo::(FormaDeSaqueo->FormaDeSaqueo)->FormaDeSaqueo->FormaDeSaqueo
+--cambiarSaqueo nuevaForma antiguaForma = nuevaForma antiguaForma
+
+universidadAntiDictaminante::FormaDeSaqueo->FormaDeSaqueo
+universidadAntiDictaminante saqueo = not.saqueo
+
+universidadBuitresAlternativos::FormaDeSaqueo->FormaDeSaqueo
+universidadBuitresAlternativos saqueo = cualquierTesoro [saqueo,buitre,soloValiosos]
+
+universidadAtlanticaInofensiva::FormaDeSaqueo->FormaDeSaqueo
+universidadAtlanticaInofensiva saqueo = saqueo
+
+--HISTORIA DE BARCOS
+
+type Situacion = (Barco->Barco)
+
+luegoDeUnaHistoria::[Situacion]->Barco->Barco
+luegoDeUnaHistoria situaciones barco = foldl aplicarSituacion barco situaciones
+
+aplicarSituacion::Barco->Situacion->Barco
+aplicarSituacion barco situacion = situacion barco
+
+historiaInofensiva::[Situacion]->[Barco]->[Barco]
+historiaInofensiva situaciones barcos = filter ((quedaIgual barcos).(luegoDeUnaHistoria situaciones)) barcos
+
+quedaIgual::[Barco]->Barco->Bool
+quedaIgual barcosOriginales barcoConHistoria = any (==barcoConHistoria) barcosOriginales
+
+mayorTripulacionHistoria::[Situacion]->[Barco]->Barco
+mayorTripulacionHistoria situaciones = ((foldl1 mayorTripulacion).map (luegoDeUnaHistoria situaciones))
+
+mayorTripulacion::Barco->Barco->Barco
+mayorTripulacion b1 b2 | (length.piratas) b1 > (length.piratas) b2 = b1
+                       | otherwise = b2
+
+
+--COMPARACIONES
+instance Eq Barco where
+    barco1 == barco2 = mismaTripulacion (piratas barco1) (piratas barco2)
+
+mismaTripulacion::[Pirata]->[Pirata]->Bool
+mismaTripulacion trip1 trip2 = all (mismoPirata trip1) trip2
+
+mismoPirata::[Pirata]->Pirata->Bool
+mismoPirata trip pir = any (==pir) trip
+
+instance Eq Pirata where
+    (==) pir1 pir2 = (nombre pir1) == (nombre pir2) && mismosTesoros (tesoros pir1) (tesoros pir2)
+
+mismosTesoros::[Tesoro]->[Tesoro]->Bool
+mismosTesoros tes1 tes2 = all (mismoTesoro tes1) tes2
+    
+mismoTesoro::[Tesoro]->Tesoro->Bool
+mismoTesoro tesoros tesoro = any (==tesoro) tesoros
+
+instance Eq Tesoro where
+    (==) t1 t2 = (nombreTesoros t1) == (nombreTesoros t2) && (valoresTesoros t1) == (valoresTesoros t2)
