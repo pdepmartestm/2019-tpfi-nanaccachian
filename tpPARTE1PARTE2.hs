@@ -270,10 +270,11 @@ universidadAtlanticaInofensiva saqueo = saqueo
 type Situacion = (Barco->Barco)
 
 luegoDeUnaHistoria::[Situacion]->Barco->Barco
-luegoDeUnaHistoria situaciones barco = foldl aplicarSituacion barco situaciones
+luegoDeUnaHistoria situaciones barco = foldl (flip ($)) barco situaciones
 
-aplicarSituacion::Barco->Situacion->Barco
-aplicarSituacion barco situacion = situacion barco
+--luegoDeUnaHistoria situaciones barco = foldl aplicarSituacion barco situaciones
+--aplicarSituacion::Barco->Situacion->Barco
+--aplicarSituacion barco situacion = situacion barco
 
 historiaInofensiva::[Situacion]->[Barco]->[Barco]
 historiaInofensiva situaciones barcos = filter ((quedaIgual barcos).(luegoDeUnaHistoria situaciones)) barcos
@@ -282,12 +283,10 @@ quedaIgual::[Barco]->Barco->Bool
 quedaIgual barcosOriginales barcoConHistoria = any (==barcoConHistoria) barcosOriginales
 
 mayorTripulacionHistoria::[Situacion]->[Barco]->Barco
-mayorTripulacionHistoria situaciones = ((foldl1 mayorTripulacion).map (luegoDeUnaHistoria situaciones))
+mayorTripulacionHistoria situaciones = (maximum.map (luegoDeUnaHistoria situaciones))
 
-mayorTripulacion::Barco->Barco->Barco
-mayorTripulacion b1 b2 | (length.piratas) b1 > (length.piratas) b2 = b1
-                       | otherwise = b2
-
+instance Ord Barco where
+    (<=) b1 b2 = (length.piratas) b1 > (length.piratas) b2
 
 --COMPARACIONES
 instance Eq Barco where
