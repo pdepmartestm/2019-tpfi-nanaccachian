@@ -6,25 +6,30 @@ type FormaDeSaqueo = Tesoro->Bool
 data Tesoro = Tesoro {
     nombreT::String,
     valorT::Int
+} | Bono {
+    cotizaciones::[Int]
+} | Letra {
+    nombreL::String,
+    tasa::Float
 } deriving (Show)
 
 data Pirata = Pirata {
-nombre::String,
-botin::[Tesoro]
+    nombre::String,
+    botin::[Tesoro]
 } deriving (Show)
 
 data Barco = Barco {
-piratas::[Pirata],
-saqueoPor::FormaDeSaqueo
+    piratas::[Pirata],
+    saqueoPor::FormaDeSaqueo
 } deriving(Show)
 
 data Isla = Isla {
-objetoEspecifico::Tesoro,
-nombreIs::String
+    objetoEspecifico::Tesoro,
+    nombreIs::String
 } deriving (Show)
 
 data Ciudad = Ciudad {
-tesorosCiudad::[Tesoro]
+    tesorosCiudad::[Tesoro]
 } deriving (Show)
 
 brujula = Tesoro {
@@ -38,22 +43,23 @@ frascoDeArena = Tesoro {
 }
 
 jackSparrow = Pirata {
-nombre = "JackSparrow",
-botin = [brujula,frascoDeArena]
+    nombre = "JackSparrow",
+    botin = [brujula,frascoDeArena]
 }
 
 davidJones = Pirata {
-nombre = "David Jones",
-botin = [cajaMusical]
+    nombre = "David Jones",
+    botin = [cajaMusical]
 }
 
 cajaMusical = Tesoro {
     nombreT= "caja musical",
     valorT = 1
 }
+
 anneBonny = Pirata {
-nombre = "Anne Bonny",
-botin = [doblones,frascoDeArena]
+    nombre = "Anne Bonny",
+    botin = [doblones,frascoDeArena]
 }
 
 doblones = Tesoro {
@@ -62,8 +68,8 @@ doblones = Tesoro {
 }
 
 elizabethSwann = Pirata {
-nombre = "Elizabeth Swann",
-botin = [moneda,espadaDeHierro]
+    nombre = "Elizabeth Swann",
+    botin = [moneda,espadaDeHierro]
 }
 
 moneda = Tesoro {
@@ -77,8 +83,8 @@ espadaDeHierro = Tesoro {
 }
 
 willTurner = Pirata {
-nombre = "Will Turner",
-botin =[cuchillo]
+    nombre = "Will Turner",
+    botin =[cuchillo]
 }
 
 cuchillo = Tesoro {
@@ -87,23 +93,23 @@ cuchillo = Tesoro {
 }
 
 perlaNegra = Barco {
-piratas = [jackSparrow,anneBonny,elizabethSwann],
-saqueoPor = soloValiosos
+    piratas = [jackSparrow,anneBonny,elizabethSwann],
+    saqueoPor = soloValiosos
 }
 
 holandesErrante = Barco {
-piratas = [davidJones],
-saqueoPor = (soloObjetosEspecificos "caja")
+    piratas = [davidJones],
+    saqueoPor = (soloObjetosEspecificos "caja")
 }
 
 islaTortuga = Isla {
-objetoEspecifico = frascoDeArena,
-nombreIs = "Isla Tortuga"
+    objetoEspecifico = frascoDeArena,
+    nombreIs = "Isla Tortuga"
 }
 
 islaRon = Isla {
-objetoEspecifico = ron,
-nombreIs = "Isla del Ron"
+    objetoEspecifico = ron,
+    nombreIs = "Isla del Ron"
 }
 
 ron = Tesoro {
@@ -112,7 +118,7 @@ ron = Tesoro {
 }
 
 lima = Ciudad {
-tesorosCiudad = [arcoEncantado,espejo]
+    tesorosCiudad = [arcoEncantado,espejo]
 }
 
 arcoEncantado = Tesoro {
@@ -217,7 +223,8 @@ abordarOtroBarco (Barco pir1 fma1) (Barco pir2 fma2) | length pir1 > length pir2
 
 --COMIENZO TP PARTE II
 
-bono1=("bono",(valor 102 234))
+valor::Tesoro->Int
+valor (Bono cot) = mayorMenorCot + div mayorMenorCot cor 
 
-valor::Int->Int->Int
-valor max min = (div ((max-min)*50) 100) + (max-min)
+mayorMenorCot::[Int]->Int
+mayorMenorCot cot = maximum cot - (minimum cot)
