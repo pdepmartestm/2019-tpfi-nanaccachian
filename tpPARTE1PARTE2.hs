@@ -267,22 +267,22 @@ universidadAtlanticaInofensiva saqueo = saqueo
 
 --HISTORIA DE BARCOS
 
-type Situacion = (Barco->Barco)
+type Historia = [(Barco->Barco)]
 
-luegoDeUnaHistoria::[Situacion]->Barco->Barco
+luegoDeUnaHistoria::Historia->Barco->Barco
 luegoDeUnaHistoria situaciones barco = foldl (flip ($)) barco situaciones
 
 --luegoDeUnaHistoria situaciones barco = foldl aplicarSituacion barco situaciones
 --aplicarSituacion::Barco->Situacion->Barco
 --aplicarSituacion barco situacion = situacion barco
 
-historiaInofensiva::[Situacion]->[Barco]->[Barco]
+historiaInofensiva::Historia->[Barco]->[Barco]
 historiaInofensiva situaciones barcos = filter ((quedaIgual barcos).(luegoDeUnaHistoria situaciones)) barcos
 
 quedaIgual::[Barco]->Barco->Bool
-quedaIgual barcosOriginales barcoConHistoria = any (==barcoConHistoria) barcosOriginales
+quedaIgual barcosOriginales barcoConHistoria = elem barcoConHistoria barcosOriginales
 
-mayorTripulacionHistoria::[Situacion]->[Barco]->Barco
+mayorTripulacionHistoria::Historia->[Barco]->Barco
 mayorTripulacionHistoria situaciones = (maximum.map (luegoDeUnaHistoria situaciones))
 
 instance Ord Barco where
@@ -309,3 +309,8 @@ mismoTesoro tesoros tesoro = any (==tesoro) tesoros
 
 instance Eq Tesoro where
     (==) t1 t2 = (nombreTesoros t1) == (nombreTesoros t2) && (valoresTesoros t1) == (valoresTesoros t2)
+
+--PROLIFERACION DE PIRATAS
+
+barcoTripulacionInfinita::[Pirata]->FormaDeSaqueo->Barco
+barcoTripulaciones piratas fma = Barco piratas fma
