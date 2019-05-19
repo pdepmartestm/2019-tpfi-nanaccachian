@@ -1,12 +1,16 @@
 import Text.Show.Functions
 
 --DEFINICIONES
-type Tesoro = (String,Int)
 type FormaDeSaqueo = Tesoro->Bool
+
+data Tesoro = Tesoro {
+    nombreT::String,
+    valorT::Int
+} deriving (Show)
 
 data Pirata = Pirata {
 nombre::String,
-botin::[(String,Int)]
+botin::[Tesoro]
 } deriving (Show)
 
 data Barco = Barco {
@@ -23,29 +27,63 @@ data Ciudad = Ciudad {
 tesorosCiudad::[Tesoro]
 } deriving (Show)
 
+brujula = Tesoro {
+    nombreT= "brujula",
+    valorT = 10000
+}
+
+frascoDeArena = Tesoro {
+    nombreT= "frasco de arena",
+    valorT = 0
+}
+
 jackSparrow = Pirata {
 nombre = "JackSparrow",
-botin = [("brujula",10000),("frasco de arena",0)]
+botin = [brujula,frascoDeArena]
 }
 
 davidJones = Pirata {
 nombre = "David Jones",
-botin = [("caja musical",1)]
+botin = [cajaMusical]
 }
 
+cajaMusical = Tesoro {
+    nombreT= "caja musical",
+    valorT = 1
+}
 anneBonny = Pirata {
 nombre = "Anne Bonny",
-botin = [("doblones",100),("frasco de arena",1)]
+botin = [doblones,frascoDeArena]
+}
+
+doblones = Tesoro {
+    nombreT = "doblones",
+    valorT = 100
 }
 
 elizabethSwann = Pirata {
 nombre = "Elizabeth Swann",
-botin = [("moneda",100),("espadaDeHierro",50)]
+botin = [moneda,espadaDeHierro]
+}
+
+moneda = Tesoro {
+    nombreT = "moneda",
+    valorT = 100
+}
+
+espadaDeHierro = Tesoro {
+    nombreT = "espada de hierro",
+    valorT = 100
 }
 
 willTurner = Pirata {
 nombre = "Will Turner",
-botin =[("cuchillo",5)]
+botin =[cuchillo]
+}
+
+cuchillo = Tesoro {
+    nombreT = "cuchillo",
+    valorT = 5
 }
 
 perlaNegra = Barco {
@@ -59,25 +97,40 @@ saqueoPor = (soloObjetosEspecificos "caja")
 }
 
 islaTortuga = Isla {
-objetoEspecifico = ("frasco de arena",1),
+objetoEspecifico = frascoDeArena,
 nombreIs = "Isla Tortuga"
 }
 
 islaRon = Isla {
-objetoEspecifico = ("botella de ron",25),
+objetoEspecifico = ron,
 nombreIs = "Isla del Ron"
 }
 
+ron = Tesoro {
+    nombreT = "botella de ron",
+    valorT = 25
+}
+
 lima = Ciudad {
-tesorosCiudad = [("arco encantado",120),("espejo",25)]
+tesorosCiudad = [arcoEncantado,espejo]
+}
+
+arcoEncantado = Tesoro {
+    nombreT = "arco encantado",
+    valorT = 120
+}
+
+espejo = Tesoro {
+    nombreT = "espejo",
+    valorT = 25
 }
 
 --TESOROS PIRATAS
-segundosElementos::[Tesoro]->[Int]
-segundosElementos tesoros = map (snd) tesoros  
-
 primerosElementos::[Tesoro]->[String]
-primerosElementos tesoros = map (fst) tesoros  
+primerosElementos tesoros = map (nombreT) tesoros
+
+segundosElementos::[Tesoro]->[Int]
+segundosElementos tesoros = map (valorT) tesoros  
 
 name::Pirata->String
 name (Pirata nom _) = nom
@@ -89,7 +142,7 @@ listaTesoros::[Pirata]->[Tesoro]
 listaTesoros pir = concat (map (tesoros) pir)
 
 cantTesoros::Pirata->Int
-cantTesoros pir = (length.segundosElementos.tesoros) pir
+cantTesoros pir = (length.tesoros) pir
 
 esAfortunado::Pirata->Bool
 esAfortunado pir = (sum.segundosElementos.tesoros) pir >= 10000
@@ -101,7 +154,7 @@ pirataTieneMismoTesoroConValorDistinto::Pirata->Tesoro->Bool
 pirataTieneMismoTesoroConValorDistinto (Pirata _ tesoros) tesoro = any (tieneMismoNombreYDistintoValor tesoro) tesoros
  
 tieneMismoNombreYDistintoValor::Tesoro->Tesoro->Bool
-tieneMismoNombreYDistintoValor t1 t2 = (fst t1 == fst t2) && (snd t1 /= snd t2)
+tieneMismoNombreYDistintoValor t1 t2 = (nombreT t1 == (nombreT t2)) && (valorT t1 /= (valorT t2))
 
 tesoroMasValioso::Pirata->Int
 tesoroMasValioso pir = (maximum.segundosElementos.tesoros) pir
@@ -110,17 +163,17 @@ agregarTesoro::Tesoro->Pirata->Pirata
 agregarTesoro tesoro (Pirata nom bot) = Pirata nom (bot ++ [tesoro])
 
 perderTesorosValiosos::Pirata->Pirata
-perderTesorosValiosos (Pirata nom tes) = Pirata nom (filter ((<=100).snd) tes)
+perderTesorosValiosos (Pirata nom tes) = Pirata nom (filter ((<=100).valorT) tes)
 
 perderTesorosNombres::Pirata->String->Pirata
-perderTesorosNombres (Pirata nom tes) nomtes = Pirata nom (filter ((/=nomtes).fst) tes)
+perderTesorosNombres (Pirata nom tes) nomtes = Pirata nom (filter ((/=nomtes).nombreT) tes)
 
 --TEMPORADA DE SAQUEOS
 soloValiosos::Tesoro->Bool
-soloValiosos = ((>=100).snd)
+soloValiosos = ((>=100).valorT)
 
 soloObjetosEspecificos::String->Tesoro->Bool
-soloObjetosEspecificos clave tesoro = ((==clave).fst) tesoro
+soloObjetosEspecificos clave tesoro = ((==clave).nombreT) tesoro
 
 soloNada::Tesoro->Bool
 soloNada tesoro = False
@@ -161,3 +214,10 @@ abordarOtroBarco (Barco pir1 fma1) (Barco pir2 fma2) | length pir1 > length pir2
                                                      | otherwise = Barco (pir1 ++ pir2) fma1
 
 --FIN TP
+
+--COMIENZO TP PARTE II
+
+bono1=("bono",(valor 102 234))
+
+valor::Int->Int->Int
+valor max min = (div ((max-min)*50) 100) + (max-min)
