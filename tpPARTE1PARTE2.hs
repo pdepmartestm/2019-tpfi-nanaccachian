@@ -311,6 +311,14 @@ instance Eq Tesoro where
     (==) t1 t2 = (nombreTesoros t1) == (nombreTesoros t2) && (valoresTesoros t1) == (valoresTesoros t2)
 
 --PROLIFERACION DE PIRATAS
+--a
+barcoTripulacionInfinita::Pirata->FormaDeSaqueo->Barco
+barcoTripulacionInfinita pirata fma = Barco (tripulacionInfinita pirata) fma
 
-barcoTripulacionInfinita::[Pirata]->FormaDeSaqueo->Barco
-barcoTripulaciones piratas fma = Barco piratas fma
+tripulacionInfinita::Pirata->[Pirata]
+tripulacionInfinita pirata = pirata : tripulacionInfinita (pirataCambiado pirata)
+
+pirataCambiado::Pirata->Pirata
+pirataCambiado (Pirata nom tes) = Pirata (nom++"a") tes
+
+--FIN TP PARTE II
